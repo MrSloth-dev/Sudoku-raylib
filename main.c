@@ -47,8 +47,10 @@ void DrawSelection(int *selected_x, int *selected_y) {
   float square_side = SCREEN_WIDTH - MARGIN * 2;
   float cell_side = square_side / 9;
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    *selected_x = ((GetMouseX() - MARGIN) / cell_side);
-    *selected_y = ((GetMouseY() - MARGIN) / cell_side);
+    if (GetMouseX() < SCREEN_WIDTH - MARGIN && GetMouseY() < SCREEN_HEIGHT - MARGIN) {
+      *selected_x = ((GetMouseX() - MARGIN) / cell_side);
+      *selected_y = ((GetMouseY() - MARGIN) / cell_side);
+    }
   }
   if (IsKeyPressed(KEY_D) && *selected_x < 8)
     *selected_x = *selected_x + 1;
@@ -80,77 +82,99 @@ void InitBoard(int array[9][9], int max_holes) {
   }
 }
 
-int MainScreen(bool *main) {
+int MainScreen(bool *main, bool *start) {
   int max_holes = 0;
   int font_size = 30;
-  DrawText("Start", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 150, 30, RAYWHITE);
-  Vector2 startpos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 150};
-  int startlen = MeasureText("Start", 30);
-  Rectangle startbounds = {startpos.x, startpos.y, startlen, 30};
   DrawText("Welcome to a simple Sudoku", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8,
            50, RAYWHITE);
-  DrawText("Choose Dificulty : ", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 200, 30,
-           RAYWHITE);
-  DrawText("Easy", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 250, 30, GREEN);
-  Vector2 easypos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 250};
-  int easylen = MeasureText("Easy", 30);
-  Rectangle easybounds = {easypos.x, easypos.y, easylen, 30};
-  DrawText("Medium", SCREEN_WIDTH / 8 + 150, SCREEN_HEIGHT / 8 + 250, 30,
-           YELLOW);
-  Vector2 mediumpos = {(float)SCREEN_WIDTH / 8 + 150, (float)SCREEN_HEIGHT / 8 + 250};
-  int mediumlen = MeasureText("Medium", 30);
-  Rectangle mediumbounds = {mediumpos.x, mediumpos.y, mediumlen, 30};
-  DrawText("Hard", SCREEN_WIDTH / 8 + 300, SCREEN_HEIGHT / 8 + 250, 30, RED);
-  Vector2 hardpos = {(float)SCREEN_WIDTH / 8 + 300, (float)SCREEN_HEIGHT / 8 + 250};
-  int hardlen = MeasureText("Hard", 30);
-  Rectangle hardbounds = {hardpos.x, hardpos.y, hardlen, 30};
+  DrawText("by MrSloth-dev", SCREEN_WIDTH - SCREEN_WIDTH / 2.95f, SCREEN_HEIGHT / 8 + 60,
+           20, RAYWHITE);
+  DrawText("Start", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 150, 30, RAYWHITE);
+  Vector2 StartPos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 150};
+  int StartLen = MeasureText("Start", 30);
+  Rectangle StartBounds = {StartPos.x, StartPos.y, StartLen, 30};
+  if (CheckCollisionPointRec(GetMousePosition(), StartBounds) &&
+    IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    *start = true;
+  }
+  if (*start == true) {
+    DrawText("Start", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 150, 30, ColorAlpha(GRAY, 0.5f));
+    DrawText("Choose Dificulty : ", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 200,
+             30, RAYWHITE);
+
+
+    DrawText("Easy", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 250, 30, GREEN);
+    Vector2 EasyPos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 250};
+    int EasyLen = MeasureText("Easy", 30);
+    Rectangle EasyBounds = {EasyPos.x, EasyPos.y, EasyLen, 30};
+
+    DrawText("Medium", SCREEN_WIDTH / 8 + 150, SCREEN_HEIGHT / 8 + 250, 30,
+             YELLOW);
+    Vector2 MediumPos = {(float)SCREEN_WIDTH / 8 + 150,
+      (float)SCREEN_HEIGHT / 8 + 250};
+    int MediumLen = MeasureText("Medium", 30);
+    Rectangle MediumBounds = {MediumPos.x, MediumPos.y, MediumLen, 30};
+
+    DrawText("Hard", SCREEN_WIDTH / 8 + 300, SCREEN_HEIGHT / 8 + 250, 30, RED);
+    Vector2 HardPos = {(float)SCREEN_WIDTH / 8 + 300,
+      (float)SCREEN_HEIGHT / 8 + 250};
+    int HardLen = MeasureText("Hard", 30);
+    Rectangle HardBounds = {HardPos.x, HardPos.y, HardLen, 30};
+
+    if (CheckCollisionPointRec(GetMousePosition(), EasyBounds) &&
+      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      max_holes = EASY_H;
+      *main = false;
+    }
+    if (CheckCollisionPointRec(GetMousePosition(), MediumBounds) &&
+      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      max_holes = MEDIUM_H;
+      *main = false;
+    }
+    if (CheckCollisionPointRec(GetMousePosition(), HardBounds) &&
+      IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+      max_holes = HARD_H;
+      *main = false;
+    }
+  }
+
   DrawText("Close Window", SCREEN_WIDTH / 8, SCREEN_HEIGHT / 8 + 300, 30,
            RAYWHITE);
-  Vector2 closepos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 300};
-  int closelen = MeasureText("Close Window", 30);
-  Rectangle closebounds = {closepos.x, closepos.y, closelen, 30};
-  if (CheckCollisionPointRec(GetMousePosition(), startbounds) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    *main = false;
-  if (CheckCollisionPointRec(GetMousePosition(), easybounds) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    max_holes = EASY_H;
-  if (CheckCollisionPointRec(GetMousePosition(), mediumbounds) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    max_holes = MEDIUM_H;
-  if (CheckCollisionPointRec(GetMousePosition(), hardbounds) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    max_holes = HARD_H;
-  if (CheckCollisionPointRec(GetMousePosition(), closebounds) &&
-      IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    exit (0);
+  Vector2 ClosePos = {(float)SCREEN_WIDTH / 8, (float)SCREEN_HEIGHT / 8 + 300};
+  int CloseLen = MeasureText("Close Window", 30);
+  Rectangle CloseBounds = {ClosePos.x, ClosePos.y, CloseLen, 30};
+
+  if (CheckCollisionPointRec(GetMousePosition(), CloseBounds) &&
+    IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    exit(0);
   return (max_holes);
 }
 
 int main() {
   int array[9][9] = {};
   bool main = true;
+  bool start = false;
 
-  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sudoku");
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "A simple Sudoku by MrSloth-dev");
   SetTargetFPS(10);
-  int selected_x = 0, selected_y = 0;
+  int selected_x = 0, selected_y = 0, max_holes = 0;
   float square_side = SCREEN_WIDTH - MARGIN * 2;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
-    while (main) {
-      BeginDrawing();
-      int max_holes = MainScreen(&main);
-      printf("%d\n", max_holes);
+    if (main) {
+      if (max_holes == 0)
+        max_holes = MainScreen(&main, &start);
+      MainScreen(&main, &start);
       InitBoard(array, max_holes);
-      EndDrawing();
-    }
+    } else {
+      ClearBackground(BACKGROUND);
       DrawSelection(&selected_x, &selected_y);
       DrawNumber(array, &selected_x, &selected_y);
-      ClearBackground(BACKGROUND);
       DrawBoard(square_side);
       if (IsKeyPressed(KEY_ENTER))
         Solve(array);
+    }
     EndDrawing();
   }
   CloseWindow();
@@ -158,11 +182,10 @@ int main() {
 }
 
 void DrawBoard(float square_side) {
-  DrawRectangleLines(MARGIN, MARGIN, square_side, square_side, LINES);
-  for (int i = 1; i < 9; i++)
+  for (int i = 0; i <= 9; i++)
     DrawLine(MARGIN + square_side / 9 * i, MARGIN, MARGIN + square_side / 9 * i,
              SCREEN_HEIGHT - MARGIN, LINES);
-  for (int i = 1; i < 9; i++)
+  for (int i = 0; i <= 9; i++)
     DrawLine(MARGIN, MARGIN + square_side / 9 * i, SCREEN_WIDTH - MARGIN,
              MARGIN + square_side / 9 * i, LINES);
   for (int i = 1; i < 3; i++)
